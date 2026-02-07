@@ -1,0 +1,24 @@
+[package]
+name = "oidn-wgpu"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.70"
+description = "Open Image Denoise (OIDN) integration for wgpu — denoise path-traced or ray-traced images from wgpu textures"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/mirkoattiladaniel/oidn-wgpu"
+keywords = ["denoise", "oidn", "wgpu", "path-tracing", "ray-tracing"]
+categories = ["graphics", "multimedia::images"]
+authors = ["oidn-wgpu contributors"]
+documentation = "https://docs.rs/oidn-wgpu"
+
+[dependencies]
+wgpu = "27"
+bytemuck = "1.24"
+half = "2.7"
+
+[build-dependencies]
+pkg-config = "0.3"
+
+[dev-dependencies]
+pollster = "0.4"

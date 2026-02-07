@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  fmt:
+    name: Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt
+      - run: cargo fmt --all -- --check
+
+  build-and-test:
+    name: Build and test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build build-essential libtbb-dev
+
+      - name: Install ISPC
+        run: |
+          ISPC_VER=1.30.0
+          curl -sL "https://github.com/ispc/ispc/releases/download/v${ISPC_VER}/ispc-v${ISPC_VER}-linux.tar.gz" | tar xz -C /tmp
+          echo "$(ls -d /tmp/ispc-v${ISPC_VER}-linux/bin)" >> $GITHUB_PATH
+          echo "$(ls -d /tmp/ispc-v${ISPC_VER}-linux/bin)" >> $GITHUB_ENV
+          echo "PATH=$(ls -d /tmp/ispc-v${ISPC_VER}-linux/bin):$PATH" >> $GITHUB_ENV
+
+      - name: Clone and build OIDN
+        run: |
+          git clone --depth 1 https://github.com/OpenImageDenoise/oidn.git /tmp/oidn
+          cd /tmp/oidn
+          git submodule update --init weights
+          mkdir build && cd build
+          cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DOIDN_DEVICE_CPU=ON ..
+          ninja
+          echo "OIDN_DIR=/tmp/oidn/build" >> $GITHUB_ENV
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+
+      - name: Build
+        run: cargo build --all-targets
+        env:
+          OIDN_DIR: /tmp/oidn/build
+
+      - name: Test
+        run: cargo test
+        env:
+          OIDN_DIR: /tmp/oidn/build
+
+      - name: Clippy
+        run: cargo clippy --all-targets -- -D warnings
+        env:
+          OIDN_DIR: /tmp/oidn/build
