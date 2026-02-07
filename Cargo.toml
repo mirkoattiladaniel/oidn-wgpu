@@ -1,6 +1,6 @@
 [package]
 name = "oidn-wgpu"
-version = "0.1.0"
+version = "2.4.1"
 edition = "2021"
 rust-version = "1.70"
 description = "Open Image Denoise (OIDN) integration for wgpu — denoise path-traced or ray-traced images from wgpu textures"
