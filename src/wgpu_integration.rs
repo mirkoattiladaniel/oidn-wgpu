@@ -268,6 +268,7 @@ pub fn denoise_texture(
 /// # Errors
 ///
 /// Same as [`denoise_texture`]; also [`Error::InvalidDimensions`] if any aux texture size does not match.
+#[allow(clippy::too_many_arguments)]
 pub fn denoise_texture_with_aux(
     device: &OidnDevice,
     wgpu_device: &wgpu::Device,
@@ -431,6 +432,7 @@ fn read_texture_to_rgba_f32(
 }
 
 /// Uploads denoised RGB + preserved alpha to a wgpu texture (padded row alignment).
+#[allow(clippy::too_many_arguments)]
 fn upload_rgba_to_texture(
     wgpu_device: &wgpu::Device,
     wgpu_queue: &wgpu::Queue,

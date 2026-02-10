@@ -62,6 +62,10 @@ pub fn is_hip_device_supported(device_id: i32) -> bool {
 }
 
 /// Whether the given Metal device (MTLDevice, passed as raw pointer) is supported.
+///
+/// # Safety
+///
+/// `device` must be a valid `MTLDevice*` or null. The pointer is not dereferenced if null.
 pub unsafe fn is_metal_device_supported(device: *mut std::ffi::c_void) -> bool {
     sys::oidnIsMetalDeviceSupported(device)
 }
@@ -198,6 +202,10 @@ impl OidnDevice {
     /// Creates a CUDA device for the given device ID and optional stream.
     /// `stream`: `None` = default stream; otherwise a valid `cudaStream_t` (e.g. from rust CUDA bindings).
     /// Currently only one (device_id, stream) pair is supported.
+    ///
+    /// # Safety
+    ///
+    /// If `stream` is `Some(p)`, `p` must be a valid `cudaStream_t` for the given device and must outlive this device.
     pub unsafe fn new_cuda_device(
         device_id: i32,
         stream: Option<*mut std::ffi::c_void>,
@@ -213,6 +221,10 @@ impl OidnDevice {
 
     /// Creates a HIP device for the given device ID and optional stream.
     /// `stream`: `None` = default stream. Currently only one pair is supported.
+    ///
+    /// # Safety
+    ///
+    /// If `stream` is `Some(p)`, `p` must be a valid HIP stream for the given device and must outlive this device.
     pub unsafe fn new_hip_device(
         device_id: i32,
         stream: Option<*mut std::ffi::c_void>,
@@ -228,6 +240,10 @@ impl OidnDevice {
 
     /// Creates a Metal device from an array of Metal command queues (MTLCommandQueue).
     /// Currently only one queue is supported. Pass a single pointer.
+    ///
+    /// # Safety
+    ///
+    /// Each element of `command_queues` must be a valid `MTLCommandQueue*` that outlives this device.
     pub unsafe fn new_metal_device(command_queues: &[*mut std::ffi::c_void]) -> Result<Self, Error> {
         let raw = sys::oidnNewMetalDevice(command_queues.as_ptr(), command_queues.len() as i32);
         if raw.is_null() {
@@ -273,6 +289,10 @@ impl OidnDevice {
 
     /// Sets the error callback. The callback is invoked from OIDN; it must not panic.
     /// `user_ptr` is passed to the callback. Must remain valid until device is released or callback is cleared.
+    ///
+    /// # Safety
+    ///
+    /// `func` must be a valid error callback that does not panic. `user_ptr` must remain valid until the device is dropped or the callback is cleared.
     pub unsafe fn set_error_function_raw(
         &self,
         func: sys::OIDNErrorFunction,

@@ -39,6 +39,7 @@ pub type OIDNFilter = *mut OIDNFilterImpl;
 
 #[repr(u32)]
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum OIDNDeviceType {
     Default = 0,
     CPU = 1,

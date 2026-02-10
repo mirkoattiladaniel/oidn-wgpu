@@ -142,6 +142,10 @@ impl<'a> RtFilter<'a> {
 
     /// Sets the progress monitor callback. Callback receives progress in [0,1]; return `false` to cancel.
     /// Safe to call with `(None, null)` to clear. Callback must not panic.
+    ///
+    /// # Safety
+    ///
+    /// `func` must be a valid progress callback that does not panic. `user_ptr` must remain valid until the filter is dropped or the callback is cleared.
     pub unsafe fn set_progress_monitor_raw(
         &self,
         func: sys::OIDNProgressMonitorFunction,
@@ -474,6 +478,10 @@ impl<'a> RtLightmapFilter<'a> {
     }
 
     /// Sets the progress monitor callback. Call with `(None, null)` to clear.
+    ///
+    /// # Safety
+    ///
+    /// `func` must be a valid progress callback that does not panic. `user_ptr` must remain valid until the filter is dropped or the callback is cleared.
     pub unsafe fn set_progress_monitor_raw(
         &self,
         func: sys::OIDNProgressMonitorFunction,
@@ -634,6 +642,7 @@ impl<'a> Filter<'a> {
     }
 
     /// Sets an image parameter from an OIDN buffer.
+    #[allow(clippy::too_many_arguments)]
     pub fn set_image(
         &self,
         name: &str,
@@ -662,6 +671,11 @@ impl<'a> Filter<'a> {
     }
 
     /// Sets an image parameter from a raw device pointer (zero-copy). Caller keeps ownership.
+    ///
+    /// # Safety
+    ///
+    /// `dev_ptr` must point to valid device memory of at least `row_byte_stride * height` bytes; the memory must remain valid and unchanged until the filter is executed or the image is unset.
+    #[allow(clippy::too_many_arguments)]
     pub unsafe fn set_shared_image(
         &self,
         name: &str,
@@ -694,6 +708,10 @@ impl<'a> Filter<'a> {
     }
 
     /// Sets an opaque data parameter (host pointer). Caller keeps ownership.
+    ///
+    /// # Safety
+    ///
+    /// `host_ptr` must point to valid, readable host memory of at least `byte_size` bytes; it must remain valid until the filter is executed or the data is unset.
     pub unsafe fn set_shared_data(&self, name: &str, host_ptr: *mut std::ffi::c_void, byte_size: usize) {
         let c_name = CString::new(name).unwrap();
         sys::oidnSetSharedFilterData(self.raw, c_name.as_ptr(), host_ptr, byte_size);
@@ -748,6 +766,10 @@ impl<'a> Filter<'a> {
     }
 
     /// Sets the progress monitor callback. Call with `(None, null)` to clear.
+    ///
+    /// # Safety
+    ///
+    /// `func` must be a valid progress callback that does not panic. `user_ptr` must remain valid until the filter is dropped or the callback is cleared.
     pub unsafe fn set_progress_monitor_raw(
         &self,
         func: sys::OIDNProgressMonitorFunction,
